@@ -1,9 +1,9 @@
+from fastapi import APIRouter, UploadFile, File, HTTPException, Body
+from pydantic import BaseModel
+from bson import ObjectId
+from bson.errors import InvalidId
 import os
 from datetime import datetime
-
-from bson import ObjectId
-from fastapi import APIRouter, UploadFile, File, HTTPException, Body
-
 from app.database.mongodb import resume_collection
 from app.services.pdf_extractor import extract_text_from_pdf
 from app.services.resume_parser import parse_resume_text
@@ -12,84 +12,133 @@ from app.utils.helpers import generate_slug
 router = APIRouter()
 
 UPLOAD_DIR = "uploads"
-if not os.path.exists(UPLOAD_DIR):
-    os.makedirs(UPLOAD_DIR)
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-
-@router.get("/")
-def home():
-    return {"message": "Backend is running"}
-
+class TemplateSelection(BaseModel):
+    template_name: str
 
 @router.post("/upload")
 async def upload_resume(resume: UploadFile = File(...)):
-    file_path = os.path.join(UPLOAD_DIR, resume.filename)
+    try:
+        file_path = os.path.join(UPLOAD_DIR, resume.filename)
 
-    with open(file_path, "wb") as f:
-        content = await resume.read()
-        f.write(content)
+        with open(file_path, "wb") as f:
+            f.write(await resume.read())
 
-    extracted_text = extract_text_from_pdf(file_path)
-    parsed_data = parse_resume_text(extracted_text)
+        text = extract_text_from_pdf(file_path)
+        parsed = parse_resume_text(text)
 
-    base_slug = generate_slug(parsed_data["name"])
-    slug = base_slug
-    counter = 1
+        print("Extracted text length:", len(text))
+        print("Parsed data keys:", list(parsed.keys()) if parsed else "None")
 
-    while resume_collection.find_one({"slug": slug}):
-        slug = f"{base_slug}-{counter}"
-        counter += 1
+        name_for_slug = parsed.get("name") or "portfolio-user"
+        slug = generate_slug(name_for_slug)
 
-    resume_document = {
-        "resume_filename": resume.filename,
-        "slug": slug,
-        "parsed_data": parsed_data,
-        "selected_template": None,
-        "published": False,
-        "created_at": datetime.utcnow(),
-        "deployed_at": None,
-    }
+        doc = {
+            "slug": slug,
+            "parsed_data": parsed,
+            "selected_template": None,
+            "published": False,
+            "created_at": datetime.utcnow(),
+            "deployed_at": None
+        }
 
-    inserted_result = resume_collection.insert_one(resume_document)
+        result = resume_collection.insert_one(doc)
 
-    return {
-        "message": "Resume uploaded successfully",
-        "document_id": str(inserted_result.inserted_id),
-        "slug": slug,
-        "parsed_data": parsed_data,
-    }
+        return {
+            "document_id": str(result.inserted_id)
+        }
+
+    except Exception as e:
+        print("UPLOAD ERROR:", str(e))
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 
-@router.get("/resume/{doc_id}")
-def get_resume(doc_id: str):
-    document = resume_collection.find_one({"_id": ObjectId(doc_id)})
+@router.get("/resume/{id}")
+def get_resume(id: str):
+    try:
+        doc = resume_collection.find_one({"_id": ObjectId(id)})
 
-    if not document:
-        raise HTTPException(status_code=404, detail="Resume not found")
+        if not doc:
+            raise HTTPException(status_code=404, detail="Resume not found")
 
-    document["_id"] = str(document["_id"])
-    return document
+        print("Fetched doc keys:", list(doc.keys()))
+        print("Parsed data keys:", list(doc.get("parsed_data", {}).keys()) if doc.get("parsed_data") else "No parsed_data")
+
+        doc["_id"] = str(doc["_id"])
+        return doc
+
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid resume ID")
+    except Exception as e:
+        print("GET RESUME ERROR:", str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to fetch resume: {str(e)}")
 
 
-@router.put("/resume/{doc_id}/select-template")
-def select_template(doc_id: str, data: dict = Body(...)):
-    template_name = data.get("template")
+@router.put("/resume/{id}/select-template")
+def select_template(id: str, payload: TemplateSelection = Body(...)):
+    try:
+        doc = resume_collection.find_one({"_id": ObjectId(id)})
+        if not doc:
+            raise HTTPException(status_code=404, detail="Resume not found")
 
-    if not template_name:
-        raise HTTPException(status_code=400, detail="Template is required")
+        resume_collection.update_one(
+            {"_id": ObjectId(id)},
+            {"$set": {"selected_template": payload.template_name}}
+        )
 
-    result = resume_collection.update_one(
-        {"_id": ObjectId(doc_id)},
-        {"$set": {"selected_template": template_name}}
-    )
+        updated_doc = resume_collection.find_one({"_id": ObjectId(id)})
+        if not updated_doc:
+            raise HTTPException(status_code=500, detail="Failed to retrieve updated document")
+        updated_doc["_id"] = str(updated_doc["_id"])
+        return updated_doc
 
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Resume not found")
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid resume ID")
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("SELECT TEMPLATE ERROR:", str(e))
+        raise HTTPException(status_code=500, detail=f"Template selection failed: {str(e)}")
 
-    updated_document = resume_collection.find_one({"_id": ObjectId(doc_id)})
-    updated_document["_id"] = str(updated_document["_id"])
 
-    return {
-        "message": "Template selected successfully",
-        "document": updated_document,
-    }
+@router.put("/resume/{id}/deploy")
+def deploy(id: str):
+    try:
+        doc = resume_collection.find_one({"_id": ObjectId(id)})
+        if not doc:
+            raise HTTPException(status_code=404, detail="Resume not found")
+
+        resume_collection.update_one(
+            {"_id": ObjectId(id)},
+            {"$set": {"published": True, "deployed_at": datetime.utcnow()}}
+        )
+
+        updated_doc = resume_collection.find_one({"_id": ObjectId(id)})
+        if not updated_doc:
+            raise HTTPException(status_code=500, detail="Failed to retrieve updated document")
+        return {"slug": updated_doc["slug"]}
+
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid resume ID")
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("DEPLOY ERROR:", str(e))
+        raise HTTPException(status_code=500, detail=f"Deploy failed: {str(e)}")
+
+
+@router.get("/u/{slug}")
+def public_portfolio(slug: str):
+    try:
+        doc = resume_collection.find_one({"slug": slug, "published": True})
+
+        if not doc:
+            raise HTTPException(status_code=404, detail="Public portfolio not found")
+
+        doc["_id"] = str(doc["_id"])
+        return doc
+
+    except Exception as e:
+        print("PUBLIC PORTFOLIO ERROR:", str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to fetch public portfolio: {str(e)}")
