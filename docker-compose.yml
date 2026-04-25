@@ -6,8 +6,10 @@ services:
     container_name: portify-backend
     ports:
       - "8000:8000"
-    env_file:
-      - ./backend/.env
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
     restart: always
 
   frontend:
