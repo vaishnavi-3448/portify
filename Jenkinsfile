@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        MONGO_URI = credentials('mongo_uri')
+    }
+
     stages {
 
         stage('Build Images') {
@@ -16,11 +20,14 @@ pipeline {
                 docker rm -f backend || true
                 docker rm -f frontend || true
 
-                docker run -d -p 5000:5000 --name backend backend
-                docker run -d -p 80:80 --name frontend frontend
+                docker run -d -p 5000:5000 \
+                -e MONGO_URI=$MONGO_URI \
+                --name backend backend
+
+                docker run -d -p 80:80 \
+                --name frontend frontend
                 '''
             }
         }
-
     }
 }
