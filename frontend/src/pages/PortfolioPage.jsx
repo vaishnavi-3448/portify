@@ -8,7 +8,7 @@ function PortfolioPage() {
 
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:8000/resume/${id}`)
+      .get(`http://127.0.0.1:5000/resume/${id}`)
       .then((res) => setData(res.data.parsed_data))
       .catch((err) => console.error(err));
   }, [id]);
