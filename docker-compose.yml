@@ -6,10 +6,8 @@ services:
     container_name: portify-backend
     ports:
       - "8000:8000"
-    environment:
-      MONGO_URI: mongodb://host.docker.internal:27017/portify
-      PORT: 8000
-      JWT_SECRET: secret123
+    env_file:
+      - ./backend/.env
     restart: always
 
   frontend:
