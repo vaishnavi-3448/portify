@@ -3,12 +3,6 @@ pipeline {
 
     stages {
 
-        stage('Clone Code') {
-            steps {
-                git 'https://github.com/vaishnavi-3448/portify.git'
-            }
-        }
-
         stage('Build Images') {
             steps {
                 sh 'docker build -t backend ./backend'
