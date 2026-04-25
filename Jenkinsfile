@@ -5,8 +5,8 @@ pipeline {
 
         stage('Build & Run') {
             steps {
-                sh 'docker compose down || true'
-                sh 'docker compose up --build -d'
+                sh 'docker-compose down || true'
+                sh 'docker-compose up --build -d'
             }
         }
 
