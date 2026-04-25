@@ -22,13 +22,15 @@ pipeline {
                 docker rm -f backend || true
                 docker rm -f frontend || true
 
-                docker run -d -p 5000:5000 \
+                # Backend fix: container runs on 8000, not 5000
+                docker run -d -p 5000:8000 \
                 -e MONGO_URI=$MONGO_URI \
                 -e DATABASE_NAME=$DATABASE_NAME \
                 -e COLLECTION_NAME=$COLLECTION_NAME \
                 --name backend backend
 
-                docker run -d -p 80:80 \
+                # Frontend fix: Vite runs on 5173 (dev mode)
+                docker run -d -p 5173:5173 \
                 --name frontend frontend
                 '''
             }
