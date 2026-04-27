@@ -30,7 +30,7 @@ pipeline {
                 --name backend backend
 
                 # Frontend fix: Vite runs on 5173 (dev mode)
-                docker run -d -p 5173:5173 \
+                docker run -d -p 80:80 \
                 --name frontend frontend
                 '''
             }
