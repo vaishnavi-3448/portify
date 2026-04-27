@@ -22,7 +22,7 @@ function UploadForm() {
     try {
       setLoading(true);
       setError("");
-      const res = await axios.post("http://127.0.0.1:5000/upload", formData);
+      const res = await axios.post("http://98.93.120.138:5000/upload", formData);
       navigate(`/templates/${res.data.document_id}`);
     } catch (error) {
       console.error(error);
