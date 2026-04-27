@@ -8,7 +8,7 @@ app = FastAPI(title="Resume Portfolio Generator API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://98.93.120.138:5173",  # your EC2 frontend
+        "http://98.93.120.138",  # your EC2 frontend
         "http://localhost:5173"       # for local dev (optional)
     ],
     allow_credentials=True,
