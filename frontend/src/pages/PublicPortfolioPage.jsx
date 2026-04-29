@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useParams } from "react-router-dom";
 import "../styles/portfolio.css";
 
-const API_BASE = "http://98.93.120.138:5000";
+const API_BASE = import.meta.env.VITE_API_BASE;
 
 function normalizeExperience(value) {
   if (!Array.isArray(value)) return [];

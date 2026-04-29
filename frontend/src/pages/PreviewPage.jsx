@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import "../styles/portfolio.css";
 
-const API_BASE = "http://98.93.120.138:5000";
+import API_BASE from "../config";
 
 function normalizeExperience(value) {
   if (!Array.isArray(value)) return [];
@@ -78,7 +78,7 @@ function PreviewPage() {
     try {
       setDeployLoading(true);
       const res = await axios.put(`${API_BASE}/resume/${id}/deploy`);
-      setLink(`http://localhost:5173/u/${res.data.slug}`);
+      setLink(`${window.location.origin}/u/${res.data.slug}`);
     } catch (error) {
       console.error("Deploy failed:", error);
       alert(error?.response?.data?.detail || "Deploy failed");
@@ -393,9 +393,15 @@ function PreviewPage() {
               </div>
 
               <div className="deploy-box">
-                <button type="button" className="primary-btn deploy-btn" onClick={deploy} disabled={deployLoading}>
-                  {deployLoading ? "Deploying..." : "Deploy Website"}
-                </button>
+                <button 
+                    type="button" 
+                    className="primary-btn deploy-btn" 
+                    onClick={deploy} 
+                    disabled={deployLoading}
+                  >
+                    {deployLoading ? "Generating..." : "Generate Public Link"}
+                  </button>
+                  
 
                 {link && (
                   <a className="deploy-link" href={link} target="_blank" rel="noreferrer">

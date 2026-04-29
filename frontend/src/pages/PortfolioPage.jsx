@@ -7,8 +7,7 @@ function PortfolioPage() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    axios
-      .get(`http://98.93.120.138:5000/resume/${id}`)
+    axios.get(`${API_BASE}/resume/${id}`)
       .then((res) => setData(res.data.parsed_data))
       .catch((err) => console.error(err));
   }, [id]);
