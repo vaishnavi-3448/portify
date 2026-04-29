@@ -75,17 +75,20 @@ function PreviewPage() {
   }, [id, navigate]);
 
   const deploy = async () => {
-    try {
-      setDeployLoading(true);
-      const res = await axios.put(`${API_BASE}/resume/${id}/deploy`);
-      setLink(`http://localhost:5173/u/${res.data.slug}`);
-    } catch (error) {
-      console.error("Deploy failed:", error);
-      alert(error?.response?.data?.detail || "Deploy failed");
-    } finally {
-      setDeployLoading(false);
-    }
-  };
+  try {
+    setDeployLoading(true);
+    const res = await axios.put(`${API_BASE}/resume/${id}/deploy`);
+
+    // ✅ CHANGED HERE
+    setLink(`http://98.93.120.138/${res.data.slug}`);
+
+  } catch (error) {
+    console.error("Deploy failed:", error);
+    alert(error?.response?.data?.detail || "Deploy failed");
+  } finally {
+    setDeployLoading(false);
+  }
+};
 
   if (loading) {
     return <div className="loading-screen">Loading portfolio preview...</div>;
