@@ -1,3 +1,2 @@
-const API_BASE = import.meta.env.VITE_API_BASE;
-
+const API_BASE = "http://98.93.120.138";
 export default API_BASE;
