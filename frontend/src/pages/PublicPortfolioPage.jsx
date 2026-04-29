@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useParams } from "react-router-dom";
 import "../styles/portfolio.css";
 
-const API_BASE = import.meta.env.VITE_API_BASE;
+const API_BASE = "http://98.93.120.138:5000";
 
 function normalizeExperience(value) {
   if (!Array.isArray(value)) return [];
@@ -50,7 +50,7 @@ function PublicPortfolioPage() {
       try {
         setLoading(true);
         setPageError("");
-        const res = await axios.get(`${API_BASE}/resume/u/${slug}`);
+        const res = await axios.get(`${API_BASE}/u/${slug}`);
         setResume(res.data);
       } catch (error) {
         console.error("Public portfolio fetch error:", error);
