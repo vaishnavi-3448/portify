@@ -7,7 +7,8 @@ function PortfolioPage() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    axios.get(`${API_BASE}/resume/${id}`)
+    axios
+      .get(`http://98.93.120.138/resume/resume/${id}`)
       .then((res) => setData(res.data.parsed_data))
       .catch((err) => console.error(err));
   }, [id]);
@@ -22,22 +23,28 @@ function PortfolioPage() {
 
       <h2>Education</h2>
       <ul>
-        {data.education.map((item, i) => (
-          <li key={i}>{item}</li>
+        {(data.education || []).map((item, i) => (
+          <li key={i}>
+            {typeof item === "object" ? item.degree || item.institution : item}
+          </li>
         ))}
       </ul>
 
       <h2>Experience</h2>
       <ul>
-        {data.experience.map((item, i) => (
-          <li key={i}>{item}</li>
+        {(data.experience || []).map((item, i) => (
+          <li key={i}>
+            {typeof item === "object" ? item.role || item.company : item}
+          </li>
         ))}
       </ul>
 
       <h2>Projects</h2>
       <ul>
-        {data.projects.map((item, i) => (
-          <li key={i}>{item}</li>
+        {(data.projects || []).map((item, i) => (
+          <li key={i}>
+            {typeof item === "object" ? item.title : item}
+          </li>
         ))}
       </ul>
     </div>

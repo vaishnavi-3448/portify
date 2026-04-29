@@ -2,7 +2,6 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../styles/portfolio.css";
-import API_BASE from "../config";
 
 function UploadForm() {
   const [file, setFile] = useState(null);
@@ -25,7 +24,7 @@ function UploadForm() {
       setError("");
 
       const res = await axios.post(
-  `${API_BASE}/resume/upload`,
+        "http://98.93.120.138:5000/upload",
         formData,
         {
           headers: {
