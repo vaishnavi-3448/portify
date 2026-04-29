@@ -50,7 +50,7 @@ function PublicPortfolioPage() {
       try {
         setLoading(true);
         setPageError("");
-        const res = await axios.get(`${API_BASE}/u/${slug}`);
+        const res = await axios.get(`${API_BASE}/resume/u/${slug}`);
         setResume(res.data);
       } catch (error) {
         console.error("Public portfolio fetch error:", error);
