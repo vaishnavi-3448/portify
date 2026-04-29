@@ -53,7 +53,7 @@ function PreviewPage() {
       try {
         setLoading(true);
         setPageError("");
-        const res = await axios.get(`${API_BASE}/resume/${id}`);
+        const res = await axios.get(`${API_BASE}/resume/resume/${id}`);
         setResume(res.data);
 
         // If no template selected, redirect to template selection
@@ -77,7 +77,7 @@ function PreviewPage() {
   const deploy = async () => {
     try {
       setDeployLoading(true);
-      const res = await axios.put(`${API_BASE}/resume/${id}/deploy`);
+      const res = await axios.put(`${API_BASE}/resume/resume/${id}/deploy`);
       setLink(`${window.location.origin}/u/${res.data.slug}`);
     } catch (error) {
       console.error("Deploy failed:", error);
