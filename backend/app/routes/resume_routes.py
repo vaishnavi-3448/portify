@@ -54,7 +54,7 @@ async def upload_resume(resume: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 
-@router.get("/resume/{id}")
+@router.get("{id}")
 def get_resume(id: str):
     try:
         doc = resume_collection.find_one({"_id": ObjectId(id)})
@@ -75,7 +75,7 @@ def get_resume(id: str):
         raise HTTPException(status_code=500, detail=f"Failed to fetch resume: {str(e)}")
 
 
-@router.put("/resume/{id}/select-template")
+@router.put("{id}/select-template")
 def select_template(id: str, payload: TemplateSelection = Body(...)):
     try:
         doc = resume_collection.find_one({"_id": ObjectId(id)})
@@ -102,7 +102,7 @@ def select_template(id: str, payload: TemplateSelection = Body(...)):
         raise HTTPException(status_code=500, detail=f"Template selection failed: {str(e)}")
 
 
-@router.put("/resume/{id}/deploy")
+@router.put("{id}/deploy")
 def deploy(id: str):
     try:
         doc = resume_collection.find_one({"_id": ObjectId(id)})

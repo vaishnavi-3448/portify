@@ -25,7 +25,7 @@ function UploadForm() {
       setError("");
 
       const res = await axios.post(
-  `${API_BASE}/upload`,
+  `${API_BASE}/resume/upload`,
         formData,
         {
           headers: {
