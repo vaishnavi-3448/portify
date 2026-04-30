@@ -191,7 +191,7 @@ function UploadForm() {
               </>
             ) : (
               <>
-                🚀 Generate Portfolio
+                 Generate Portfolio
               </>
             )}
           </button>
