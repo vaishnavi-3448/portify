@@ -110,7 +110,7 @@ function UploadForm() {
         <h1 className="upload-logo">✨ PORTIFY</h1>
 
         <p className="upload-subtitle">
-          Turn your resume into a polished, deployable portfolio website with a public link.
+           your resume into a polished, deployable portfolio website with a public link.
         </p>
 
         <div
